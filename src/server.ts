@@ -46,3 +46,13 @@ async function connectToDBAndStartListening() {
         );
     });
 }
+
+app.get("/flashcards", async (_req, res) => {
+    try {
+        const text = "SELECT * FROM flashcard";
+        const allFlashcards = await client.query(text);
+        res.status(200).json(allFlashcards.rows);
+    } catch (err) {
+        console.error(err);
+    }
+});
