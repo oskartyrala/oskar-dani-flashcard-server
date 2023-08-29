@@ -56,3 +56,37 @@ app.get("/flashcards", async (_req, res) => {
         console.error(err);
     }
 });
+
+app.get("/decks", async (_req, res) => {
+    try {
+        const text = "SELECT * FROM deck";
+        const allDecks = await client.query(text);
+        res.status(200).json(allDecks.rows);
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+app.post("/flashcards", async (req, res) => {
+    try {
+        const { front, back } = req.body;
+        const text = "INSERT INTO flashcard(front, back) VALUES($1, $2)";
+        const values = [front, back];
+        const newFlashcard = await client.query(text, values);
+        res.status(200).json(newFlashcard);
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+app.post("/decks", async (req, res) => {
+    try {
+        const { name } = req.body;
+        const text = "INSERT INTO deck(name) VALUES($1)";
+        const values = [name];
+        const newDeck = await client.query(text, values);
+        res.status(200).json(newDeck);
+    } catch (err) {
+        console.error(err);
+    }
+});
