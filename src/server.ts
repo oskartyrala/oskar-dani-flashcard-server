@@ -62,11 +62,13 @@ app.get("/flashcards", async (_req, res) => {
     }
 });
 
-app.get("/decks", async (_req, res) => {
+app.get("/decks/:id", async (req, res) => {
     try {
-        const text = "SELECT * FROM deck";
+        const { id } = req.params;
+        const text = "SELECT * FROM deck WHERE user_id = $1";
+        const values = [id];
         qNum++;
-        const response = await queryAndLog(qNum, client, text);
+        const response = await queryAndLog(qNum, client, text, values);
         const allDecks = response.rows;
         res.status(200).json(allDecks);
     } catch (err) {
@@ -95,6 +97,18 @@ app.post("/decks", async (req, res) => {
         qNum++;
         const response = await queryAndLog(qNum, client, text, values);
         res.status(200).json(response);
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+app.get("/users", async (_req, res) => {
+    try {
+        const text = "SELECT * FROM users";
+        qNum++;
+        const response = await queryAndLog(qNum, client, text);
+        const allUsers = response.rows;
+        res.status(200).json(allUsers);
     } catch (err) {
         console.error(err);
     }
