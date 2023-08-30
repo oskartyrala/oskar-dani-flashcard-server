@@ -50,13 +50,15 @@ async function connectToDBAndStartListening() {
     });
 }
 
-app.get("/flashcards", async (_req, res) => {
+app.get("/:deckid/flashcards", async (req, res) => {
     try {
-        const text = "SELECT * FROM flashcard";
+        const { deckid } = req.params;
+        const text = "SELECT * FROM flashcard WHERE deck_id = $1";
+        const values = [deckid];
         qNum++;
-        const response = await queryAndLog(qNum, client, text);
-        const allFlashcards = response.rows;
-        res.status(200).json(allFlashcards);
+        const response = await queryAndLog(qNum, client, text, values);
+        const deckCards = response.rows;
+        res.status(200).json(deckCards);
     } catch (err) {
         console.error(err);
     }
@@ -69,8 +71,8 @@ app.get("/decks/:id", async (req, res) => {
         const values = [id];
         qNum++;
         const response = await queryAndLog(qNum, client, text, values);
-        const allDecks = response.rows;
-        res.status(200).json(allDecks);
+        const userDecks = response.rows;
+        res.status(200).json(userDecks);
     } catch (err) {
         console.error(err);
     }
