@@ -4,11 +4,14 @@ import express from "express";
 import { Client } from "pg";
 import { getEnvVarOrFail } from "./support/envVarUtils";
 import { setupDBClientConfig } from "./support/setupDBClientConfig";
+import queryAndLog from "./support/queryAndLog";
 
 dotenv.config(); //Read .env file lines as though they were env vars.
 
 const dbClientConfig = setupDBClientConfig();
 const client = new Client(dbClientConfig);
+
+let qNum = 0;
 
 //Configure express routes
 const app = express();
@@ -50,8 +53,10 @@ async function connectToDBAndStartListening() {
 app.get("/flashcards", async (_req, res) => {
     try {
         const text = "SELECT * FROM flashcard";
-        const allFlashcards = await client.query(text);
-        res.status(200).json(allFlashcards.rows);
+        qNum++;
+        const response = await queryAndLog(qNum, client, text);
+        const allFlashcards = response.rows;
+        res.status(200).json(allFlashcards);
     } catch (err) {
         console.error(err);
     }
@@ -60,8 +65,10 @@ app.get("/flashcards", async (_req, res) => {
 app.get("/decks", async (_req, res) => {
     try {
         const text = "SELECT * FROM deck";
-        const allDecks = await client.query(text);
-        res.status(200).json(allDecks.rows);
+        qNum++;
+        const response = await queryAndLog(qNum, client, text);
+        const allDecks = response.rows;
+        res.status(200).json(allDecks);
     } catch (err) {
         console.error(err);
     }
@@ -72,8 +79,9 @@ app.post("/flashcards", async (req, res) => {
         const { front, back } = req.body;
         const text = "INSERT INTO flashcard(front, back) VALUES($1, $2)";
         const values = [front, back];
-        const newFlashcard = await client.query(text, values);
-        res.status(200).json(newFlashcard);
+        qNum++;
+        const response = await queryAndLog(qNum, client, text, values);
+        res.status(200).json(response);
     } catch (err) {
         console.error(err);
     }
@@ -84,8 +92,9 @@ app.post("/decks", async (req, res) => {
         const { name } = req.body;
         const text = "INSERT INTO deck(name) VALUES($1)";
         const values = [name];
-        const newDeck = await client.query(text, values);
-        res.status(200).json(newDeck);
+        qNum++;
+        const response = await queryAndLog(qNum, client, text, values);
+        res.status(200).json(response);
     } catch (err) {
         console.error(err);
     }
