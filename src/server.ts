@@ -80,9 +80,10 @@ app.get("/decks/:id", async (req, res) => {
 
 app.post("/flashcards", async (req, res) => {
     try {
-        const { front, back } = req.body;
-        const text = "INSERT INTO flashcard(front, back) VALUES($1, $2)";
-        const values = [front, back];
+        const { front, back, deck_id } = req.body;
+        const text =
+            "INSERT INTO flashcard(front, back, deck_id) VALUES($1, $2, $3)";
+        const values = [front, back, deck_id];
         qNum++;
         const response = await queryAndLog(qNum, client, text, values);
         res.status(200).json(response);
