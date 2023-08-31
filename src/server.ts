@@ -105,6 +105,19 @@ app.post("/decks", async (req, res) => {
     }
 });
 
+app.post("/users", async (req, res) => {
+    try {
+        const { user_name } = req.body;
+        const text = "INSERT INTO users(name) VALUES($1)";
+        const values = [user_name];
+        qNum++;
+        const response = await queryAndLog(qNum, client, text, values);
+        res.status(200).json(response);
+    } catch (err) {
+        console.error(err);
+    }
+});
+
 app.get("/users", async (_req, res) => {
     try {
         const text = "SELECT * FROM users";
