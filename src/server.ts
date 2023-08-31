@@ -129,3 +129,18 @@ app.get("/users", async (_req, res) => {
         console.error(err);
     }
 });
+
+app.patch("/flashcards/:id", async (req, res) => {
+    try {
+        const { interval } = req.body;
+        const { id } = req.params;
+        const hours = (interval * 24).toString();
+        const text =
+            "UPDATE flashcard SET next_review = next_review + '$1 hours' WHERE card_id = $2";
+        const values = [hours, id];
+        const response = await queryAndLog(qNum, client, text, values);
+        res.status(200).json(response);
+    } catch (err) {
+        console.error(err);
+    }
+});
