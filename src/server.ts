@@ -94,9 +94,9 @@ app.post("/flashcards", async (req, res) => {
 
 app.post("/decks", async (req, res) => {
     try {
-        const { name } = req.body;
-        const text = "INSERT INTO deck(name) VALUES($1)";
-        const values = [name];
+        const { name, user_id } = req.body;
+        const text = "INSERT INTO deck(name, user_id) VALUES($1, $2)";
+        const values = [name, user_id];
         qNum++;
         const response = await queryAndLog(qNum, client, text, values);
         res.status(200).json(response);
