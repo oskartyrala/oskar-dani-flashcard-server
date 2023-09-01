@@ -5,7 +5,7 @@ export default async function queryAndLog(
     qNum: number,
     client: Client,
     sql: string,
-    params: string[] = []
+    params: (string | number)[] = []
 ): Promise<QueryResult> {
     const paddedNum = qNum.toString().padStart(4, "0");
     console.log(`SQL START qNum: ${paddedNum} sql: ${sql} params:`, params);
