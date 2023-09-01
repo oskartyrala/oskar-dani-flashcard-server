@@ -5,6 +5,7 @@ import { Client } from "pg";
 import { getEnvVarOrFail } from "./support/envVarUtils";
 import { setupDBClientConfig } from "./support/setupDBClientConfig";
 import queryAndLog from "./support/queryAndLog";
+import getInterval from "./support/getInterval";
 
 dotenv.config(); //Read .env file lines as though they were env vars.
 
@@ -125,6 +126,22 @@ app.get("/users", async (_req, res) => {
         const response = await queryAndLog(qNum, client, text);
         const allUsers = response.rows;
         res.status(200).json(allUsers);
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+app.patch("/flashcards/:id", async (req, res) => {
+    try {
+        const { streak } = req.body;
+        const { id } = req.params;
+        const interval = getInterval(streak);
+        const hours = `${interval * 24} hours`;
+        const text =
+            "UPDATE flashcard SET next_review = now() + $1, streak = $2 WHERE card_id = $3";
+        const values = [hours, streak, id];
+        const response = await queryAndLog(qNum, client, text, values);
+        res.status(200).json(response);
     } catch (err) {
         console.error(err);
     }
