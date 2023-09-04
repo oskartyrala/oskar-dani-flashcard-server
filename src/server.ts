@@ -146,3 +146,30 @@ app.patch("/flashcards/:id", async (req, res) => {
         console.error(err);
     }
 });
+
+app.delete("/flashcards/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const text = "DELETE from flashcard WHERE card_id = $1";
+        const values = [id];
+        const response = await queryAndLog(qNum, client, text, values);
+        res.status(200).json(response);
+    } catch (err) {
+        console.error(err);
+    }
+});
+
+app.delete("/decks/:id", async (req, res) => {
+    try {
+        const { id } = req.params;
+        const cardsText = "DELETE from flashcard WHERE deck_id = $1";
+        const values = [id];
+        const decksText = "DELETE from deck WHERE deck_id = $1";
+        const cardResponse = await queryAndLog(qNum, client, cardsText, values);
+        res.status(200).json(cardResponse);
+        const deckResponse = await queryAndLog(qNum, client, decksText, values);
+        res.status(200).json(deckResponse);
+    } catch (err) {
+        console.error(err);
+    }
+});
