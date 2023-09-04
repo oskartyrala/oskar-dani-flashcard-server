@@ -54,7 +54,8 @@ async function connectToDBAndStartListening() {
 app.get("/:deckid/flashcards", async (req, res) => {
     try {
         const { deckid } = req.params;
-        const text = "SELECT * FROM flashcard WHERE deck_id = $1";
+        const text =
+            "SELECT * FROM flashcard WHERE deck_id = $1 AND next_review <= now() ORDER BY next_review";
         const values = [deckid];
         qNum++;
         const response = await queryAndLog(qNum, client, text, values);
@@ -131,7 +132,7 @@ app.get("/users", async (_req, res) => {
     }
 });
 
-app.patch("/flashcards/:id", async (req, res) => {
+app.put("/flashcards/:id", async (req, res) => {
     try {
         const { streak } = req.body;
         const { id } = req.params;
