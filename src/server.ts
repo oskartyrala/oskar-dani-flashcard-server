@@ -5,7 +5,7 @@ import { Client } from "pg";
 import { getEnvVarOrFail } from "./support/envVarUtils";
 import { setupDBClientConfig } from "./support/setupDBClientConfig";
 import queryAndLog from "./support/queryAndLog";
-import getInterval from "./support/getInterval";
+import flashcardRoutes from "./flashcardRoutes";
 
 dotenv.config(); //Read .env file lines as though they were env vars.
 
@@ -51,20 +51,7 @@ async function connectToDBAndStartListening() {
     });
 }
 
-app.get("/:deckid/flashcards", async (req, res) => {
-    try {
-        const { deckid } = req.params;
-        const text =
-            "SELECT * FROM flashcard WHERE deck_id = $1 AND next_review <= now() ORDER BY next_review";
-        const values = [deckid];
-        qNum++;
-        const response = await queryAndLog(qNum, client, text, values);
-        const deckCards = response.rows;
-        res.status(200).json(deckCards);
-    } catch (err) {
-        console.error(err);
-    }
-});
+app.use("/flashcards", flashcardRoutes(client, qNum));
 
 app.get("/decks/:id", async (req, res) => {
     try {
@@ -75,20 +62,6 @@ app.get("/decks/:id", async (req, res) => {
         const response = await queryAndLog(qNum, client, text, values);
         const userDecks = response.rows;
         res.status(200).json(userDecks);
-    } catch (err) {
-        console.error(err);
-    }
-});
-
-app.post("/flashcards", async (req, res) => {
-    try {
-        const { front, back, deck_id } = req.body;
-        const text =
-            "INSERT INTO flashcard(front, back, deck_id) VALUES($1, $2, $3)";
-        const values = [front, back, deck_id];
-        qNum++;
-        const response = await queryAndLog(qNum, client, text, values);
-        res.status(200).json(response);
     } catch (err) {
         console.error(err);
     }
@@ -127,34 +100,6 @@ app.get("/users", async (_req, res) => {
         const response = await queryAndLog(qNum, client, text);
         const allUsers = response.rows;
         res.status(200).json(allUsers);
-    } catch (err) {
-        console.error(err);
-    }
-});
-
-app.put("/flashcards/:id", async (req, res) => {
-    try {
-        const { streak } = req.body;
-        const { id } = req.params;
-        const interval = getInterval(streak);
-        const hours = `${interval * 24} hours`;
-        const text =
-            "UPDATE flashcard SET next_review = now() + $1, streak = $2 WHERE card_id = $3";
-        const values = [hours, streak, id];
-        const response = await queryAndLog(qNum, client, text, values);
-        res.status(200).json(response);
-    } catch (err) {
-        console.error(err);
-    }
-});
-
-app.delete("/flashcards/:id", async (req, res) => {
-    try {
-        const { id } = req.params;
-        const text = "DELETE from flashcard WHERE card_id = $1";
-        const values = [id];
-        const response = await queryAndLog(qNum, client, text, values);
-        res.status(200).json(response);
     } catch (err) {
         console.error(err);
     }
